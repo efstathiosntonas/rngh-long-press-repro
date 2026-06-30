@@ -1,0 +1,39 @@
+Workaround: revert PR #4177's strict `indexOfChild` "disappearing child" check
+in GestureHandlerOrchestrator, which false-negatives expo-blur's reparented
+`UIManagerCompatibleBlurTarget` and cancels every gesture under a BlurTargetView.
+Apply against react-native-gesture-handler 3.0.2.
+
+  npx patch-package react-native-gesture-handler   # or pnpm patch, etc.
+
+diff --git a/android/src/main/java/com/swmansion/gesturehandler/core/GestureHandlerOrchestrator.kt b/android/src/main/java/com/swmansion/gesturehandler/core/GestureHandlerOrchestrator.kt
+--- a/android/src/main/java/com/swmansion/gesturehandler/core/GestureHandlerOrchestrator.kt
++++ b/android/src/main/java/com/swmansion/gesturehandler/core/GestureHandlerOrchestrator.kt
+@@ -357,19 +357,16 @@ class GestureHandlerOrchestrator(
+     if (view === wrapperView) {
+       return true
+     }
+-    var current: View = view
+-    while (true) {
+-      val parent = current.parent as? ViewGroup ?: return false
+-
+-      when {
+-        // A disappearing child (kept drawable for an exit animation, e.g. RNScreens during a
+-        // navigation transition) still has `parent` set but is gone from `mChildren`. Treat as
+-        // detached - `cancelTouchTarget` already synthesized ACTION_CANCEL into this subtree.
+-        parent.indexOfChild(current) < 0 -> return false
+-        parent === wrapperView -> return true
+-        else -> current = parent
+-      }
++    // Reverted PR #4177's strict `indexOfChild(current) < 0` disappearing-child check: it
++    // false-negatives FlashList/FlatList recycled (virtualized) cells, so the orchestrator
++    // cancels every list-item gesture (e.g. long-press) on its first event before it can begin.
++    // Restores the lenient pre-#4177 parent walk. Trade-off: re-introduces #4177's niche
++    // RNScreens-nav ScrollView invalid-pointer crash.
++    var parent = view.parent
++    while (parent != null && parent !== wrapperView) {
++      parent = parent.parent
+     }
++    return parent === wrapperView
+   }
+
+   fun isAnyHandlerActive() = gestureHandlers.any { it.state == GestureHandler.STATE_ACTIVE }
