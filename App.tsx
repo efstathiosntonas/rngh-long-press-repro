@@ -42,14 +42,6 @@ function TreeStack() {
   );
 }
 
-function FillerStack() {
-  return (
-    <Stack.Navigator screenOptions={stackScreenOptions}>
-      <Stack.Screen component={PlaceholderScreen} name="Filler" options={{ title: 'Filler' }} />
-    </Stack.Navigator>
-  );
-}
-
 const tabScreenOptions = {
   animation: 'none' as const,
   headerShown: false,
@@ -65,9 +57,6 @@ export default function App() {
             <Tab.Navigator backBehavior="none" screenOptions={tabScreenOptions}>
               <Tab.Screen component={MinimalStack} name="Minimal" />
               <Tab.Screen component={TreeStack} name="Tree" />
-              <Tab.Screen component={FillerStack} name="A" />
-              <Tab.Screen component={FillerStack} name="B" />
-              <Tab.Screen component={FillerStack} name="C" />
             </Tab.Navigator>
           </NavigationContainer>
         </BlurTargetView>
