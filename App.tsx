@@ -6,7 +6,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { MinimalScreen } from '@/screens/MinimalScreen';
-import { PlaceholderScreen } from '@/screens/PlaceholderScreen';
 import { TreeScreen } from '@/screens/TreeScreen';
 
 // THE TRIGGER: expo-blur's <BlurTargetView> (ExpoBlurTargetView) hosts its children
